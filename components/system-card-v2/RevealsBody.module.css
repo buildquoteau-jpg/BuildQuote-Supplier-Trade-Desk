@@ -1,0 +1,653 @@
+/* System Card V2 — the card object itself: a rounded frame on a dark
+   backdrop that grows as its independent sections are opened. The page
+   itself is the scroll container — there is no inner clipped viewport, no
+   fixed card height. Ported from Data Studio's System Card V2
+   (components/system-card-v2/RevealsBody.module.css), with two changes:
+   fonts reference this app's existing next/font variables instead of a
+   separately-injected Google Fonts stylesheet, and an "Add to shopping
+   list" button (.addToListBtn) was added at the bottom for Trade Desk's
+   real cart — the Data Studio source only ever fills a live preview table
+   and stops at Share. */
+
+.page {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 38%, rgba(58, 51, 40, 0.9) 0%, rgba(28, 26, 23, 0.4) 45%, rgba(13, 12, 10, 0) 75%),
+    #0d0c0a;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 14px;
+}
+
+@media (min-width: 640px) {
+  .page { padding: 32px; }
+}
+
+@media (min-width: 1024px) {
+  .page { padding: 56px; }
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  background: #14161a;
+}
+
+@media (min-width: 640px) {
+  .card { max-width: 560px; }
+}
+
+@media (min-width: 1024px) {
+  .card { max-width: 720px; }
+}
+
+@media (min-width: 1440px) {
+  .card { max-width: 860px; }
+}
+
+.screenBgImage {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.16;
+}
+
+.sectionBgWrap {
+  position: relative;
+}
+
+/* ── Expandable sections ─────────────────────────────────────────────────── */
+
+.sectionsList {
+  --ink: #1c1a17;
+  --ink-soft: #57534c;
+  --ink-faint: #8a8478;
+  --paper: #ffffff;
+  --raised: #ffffff;
+  --line: rgba(28, 26, 23, 0.13);
+  --line-strong: rgba(28, 26, 23, 0.24);
+  --accent: #185d7a;
+  --accent-soft: rgba(24, 93, 122, 0.08);
+  --success: #16a34a;
+
+  background: var(--paper);
+}
+
+.section {
+  border-top: 1px solid var(--line);
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.sectionBar {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 2.2rem;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 36px;
+  transition: background-color 0.15s ease;
+}
+
+.sectionBar:hover:not(:disabled) {
+  background: #2a2620;
+}
+
+.sectionBar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.sectionBar:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.sectionBarText {
+  min-width: 0;
+  text-align: center;
+}
+
+.sectionBarTitle {
+  display: block;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: -0.005em;
+  color: var(--paper);
+}
+
+.sectionBarSubtitle {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(246, 244, 239, 0.6);
+  margin-top: 0.1rem;
+}
+
+.sectionChevron {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  display: flex;
+  color: var(--paper);
+  transform: translateY(-50%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sectionBar[aria-expanded='true'] .sectionChevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sectionGrid[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+.sectionInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sectionPanel {
+  padding: 0.25rem 1.25rem 2rem;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sectionGrid[data-open='true'] .sectionPanel {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.08s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionGrid, .sectionPanel, .sectionChevron {
+    transition: none;
+  }
+}
+
+.cardClose {
+  padding: 1.5rem 1.25rem 2rem;
+  text-align: center;
+  border-top: 1px solid var(--line);
+}
+
+.barNext {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.62rem 1rem;
+  min-height: 44px;
+  background: #1c1a17;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.barNext:hover { opacity: 0.85; }
+.barNext:focus-visible { outline: 2px solid #185d7a; outline-offset: 2px; }
+
+/* ── Reveal 1 — Choose ─────────────────────────────────────────────────── */
+
+.chooseHint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.groupLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 0.75rem;
+}
+
+.groupLabel + .groupLabel {
+  margin-top: 2rem;
+}
+
+.swatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  width: 84px;
+}
+
+.swatchImgWrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.swatch[aria-pressed='true'] .swatchImgWrap {
+  border-color: var(--ink);
+}
+
+.swatchImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.swatchCheck {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swatchLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.profileRole {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.2rem;
+}
+
+/* ── Attributes and Information ───────────────────────────────────────── */
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1.75rem;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+}
+
+.badge[data-tone='performance'] {
+  background: #dceefc;
+  color: #0c4a6e;
+}
+
+.badge[data-tone='neutral'] {
+  background: #e9e5dc;
+  color: var(--ink-soft);
+}
+
+.badge[data-tone='success'] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.specGroup {
+  margin-bottom: 1.75rem;
+}
+
+.specGroup:last-child {
+  margin-bottom: 0;
+}
+
+.specGroupLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 0.6rem;
+}
+
+.descriptionText {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.specBox {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.2rem 1rem;
+}
+
+.specBox + .specBox {
+  margin-top: 0.7rem;
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specRowLabel {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.specRowValue {
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.specTableScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.specTable {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  background: var(--raised);
+}
+
+.specTable th {
+  text-align: left;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+
+.specTable td {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.specTable tr:last-child td {
+  border-bottom: none;
+}
+
+.specTableName {
+  font-weight: 700;
+  color: var(--ink);
+  white-space: normal;
+  min-width: 160px;
+}
+
+.resourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.resourceRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  min-height: 44px;
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+
+.resourceRow:hover {
+  border-color: var(--accent);
+  background: #d7e9f2;
+}
+
+.resourceRow:active {
+  transform: scale(0.99);
+}
+
+.resourceRow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.resourceText {
+  min-width: 0;
+}
+
+.resourceLabel {
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+}
+
+.resourceMeta {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  margin: 0 0 0.1rem;
+}
+
+/* ── Components and Accessories ───────────────────────────────────────── */
+
+.systemIntro {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.systemIntro strong {
+  color: var(--ink);
+}
+
+.systemGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.systemGroupHead {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.systemGroupNum {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.systemGroupIcon {
+  flex-shrink: 0;
+  color: var(--ink-soft);
+}
+
+.systemGroupLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.tableCheck {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tableCheck[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.tableCheck:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Stockists ─────────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink-faint);
+  font-size: 0.84rem;
+  padding: 0.4rem 0 1.5rem;
+}
+
+.selectionColourNote {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: -0.3rem 0 0.75rem;
+}
+
+.specTableNum {
+  color: var(--ink-faint);
+  width: 1.5rem;
+}
+
+.specTableSub {
+  display: block;
+  font-weight: 400;
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  margin-top: 0.15rem;
+  white-space: normal;
+}
+
+/* "Add to shopping list" — the one real action V2's sandbox never needed
+   (it only ever filled a live preview table). Same visual language as the
+   card's closing Share action (.barNext) but full width and with a
+   post-add success state. Used by Trade Desk, which already has a real
+   cart (see SystemCardV2Experience's onAddToList prop). */
+.addToListBtn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.8rem 1rem;
+  min-height: 44px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  margin-top: 0.85rem;
+}
+
+.addToListBtn:disabled {
+  background: #f1f5f9;
+  border-color: var(--line);
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.addToListBtn[data-state='success'] {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.addToListBtn:hover:not(:disabled) {
+  opacity: 0.88;
+}

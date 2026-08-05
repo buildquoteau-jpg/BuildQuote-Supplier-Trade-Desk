@@ -5,6 +5,30 @@ import { SupplierData, Manufacturer } from './shared'
 import { SystemCardTile } from '@/components/system-card/SystemCardTile'
 import { ManufacturerCardTile } from '@/components/system-card/ManufacturerCardTile'
 import { adaptProductionSystem } from '@/components/system-card/adaptProductionSystem'
+import { SystemCardV2Experience } from '@/components/system-card-v2/SystemCardV2Experience'
+import type { SystemCardSystem } from '@/components/system-card/types'
+
+// A previously-inert tile now opens the real System Card V2 detail view —
+// browse/select/Share only, no "Add to shopping list" (this tab has never
+// had a cart; it's about deciding what to stock, not building a customer
+// materials list) and no stockists (same "staff are the local stockist"
+// reasoning Trade Desk already applies).
+function SystemDetailModal({ system, onClose }: { system: SystemCardSystem; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto"
+      style={{ background: 'rgba(0,0,0,0.65)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="w-full max-w-3xl my-8">
+        <div className="flex items-center justify-end mb-3 sticky top-0 z-10">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface border border-border text-text-secondary hover:text-text-primary flex items-center justify-center text-xl leading-none shadow-md">×</button>
+        </div>
+        <SystemCardV2Experience system={system} showStockists={false} />
+      </div>
+    </div>
+  )
+}
 
 function stockedIdsFromSupplier(s: SupplierData): Set<string> {
   return new Set(s.embed_widgets.flatMap(w => w.embed_widget_systems.map(ews => ews.system_id)))
@@ -26,6 +50,7 @@ export function MyProductsTab({
   const [openManufacturerSlug, setOpenManufacturerSlug] = useState<string | null>(null)
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
+  const [openSystem, setOpenSystem] = useState<SystemCardSystem | null>(null)
 
   // Local optimistic mirror of "what's stocked" (derived from embed_widgets —
   // same underlying data Trade Desk reads, just presented here without the
@@ -154,10 +179,10 @@ export function MyProductsTab({
               const saving = savingIds.has(sys.id)
               return (
                 <div key={sys.id} className={`relative rounded-2xl ${stocked ? 'ring-2 ring-success' : ''}`}>
-                  <SystemCardTile system={system} onClick={() => {}} />
-                  {/* Card's own "View details →" isn't accurate here (this tab
-                      only ticks/unticks stocking) — an explicit checkbox row
-                      overlaid at the bottom is the actual, unambiguous control. */}
+                  <SystemCardTile system={system} onClick={() => setOpenSystem(system)} />
+                  {/* The tile itself now opens the real System Card V2 detail
+                      view (browse-only) — the checkbox row below remains the
+                      actual, unambiguous stocking control. */}
                   <button
                     type="button"
                     disabled={saving}
@@ -179,6 +204,8 @@ export function MyProductsTab({
           </div>
         </div>
       )}
+
+      {openSystem && <SystemDetailModal system={openSystem} onClose={() => setOpenSystem(null)} />}
     </div>
   )
 }

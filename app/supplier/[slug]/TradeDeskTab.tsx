@@ -5,7 +5,7 @@ import { SupplierData, Manufacturer } from './shared'
 import { fuzzyIncludes } from '@/lib/fuzzyMatch'
 import { CATEGORY_COLOURS } from '@/components/system-card/SystemCardTile'
 import { SystemCardTile } from '@/components/system-card/SystemCardTile'
-import { SystemCardRenderer } from '@/components/system-card/SystemCardRenderer'
+import { SystemCardV2Experience } from '@/components/system-card-v2/SystemCardV2Experience'
 import { ShoppingListProvider, useShoppingList } from '@/components/system-card/ShoppingListProvider'
 import { ShoppingListDrawer } from '@/components/system-card/ShoppingListDrawer'
 import { adaptProductionSystem } from '@/components/system-card/adaptProductionSystem'
@@ -235,7 +235,7 @@ function SystemDetailModal({
       style={{ background: 'rgba(0,0,0,0.65)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="w-full max-w-xl my-8">
+      <div className="w-full max-w-3xl my-8">
         <div className="flex items-center justify-between mb-3 sticky top-0 z-10">
           <button
             onClick={onSendReviewLink}
@@ -245,7 +245,7 @@ function SystemDetailModal({
           </button>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface border border-border text-text-secondary hover:text-text-primary flex items-center justify-center text-xl leading-none shadow-md">×</button>
         </div>
-        <SystemCardRenderer
+        <SystemCardV2Experience
           system={galleryImages ? { ...system, gallery_images: galleryImages } : system}
           showStockists={false}
           onAddToList={addItems}
