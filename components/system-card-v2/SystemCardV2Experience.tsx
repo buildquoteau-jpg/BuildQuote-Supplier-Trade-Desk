@@ -36,6 +36,81 @@ function ShareIcon() {
   )
 }
 
+// Small per-section glyphs — mostly cosmetic, but they're what breaks five
+// identical black bars into a scannable menu rather than a stack of
+// repeated buttons. aria-hidden in SystemCardSection; the title text alone
+// remains the accessible name.
+function ChooseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="12" r="5" /><circle cx="15" cy="8" r="5" /><circle cx="15" cy="16" r="5" />
+    </svg>
+  )
+}
+function AttributesIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" />
+      <circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+function GuidesIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17z" /><line x1="20" y1="19" x2="6.5" y2="19" />
+    </svg>
+  )
+}
+function ComponentsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z" />
+    </svg>
+  )
+}
+function StockistsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+
+// One-line live previews shown on each closed bar.
+function chooseSubtitle(system: SystemCardSystem): string | undefined {
+  const parts: string[] = []
+  if (system.system_colours.length > 0) parts.push(`${system.system_colours.length} colour${system.system_colours.length !== 1 ? 's' : ''}`)
+  if (system.system_profiles.length > 0) parts.push(`${system.system_profiles.length} profile${system.system_profiles.length !== 1 ? 's' : ''}`)
+  return parts.length > 0 ? parts.join(' · ') : undefined
+}
+function attributesSubtitle(system: SystemCardSystem): string | undefined {
+  const parts: string[] = []
+  if (system.moisture_resistant) parts.push('Moisture resistant')
+  if (system.bal_rating) parts.push(`BAL ${system.bal_rating}`)
+  if (system.fire_rating) parts.push(`Fire ${system.fire_rating}`)
+  if (system.australian_made) parts.push('Australian made')
+  return parts.length > 0 ? parts.slice(0, 2).join(' · ') : undefined
+}
+function guidesSubtitle(system: SystemCardSystem): string | undefined {
+  const count = (system.install_guide_urls?.length ?? 0) + (system.design_guide_url ? 1 : 0) +
+    (system.tech_data_url ? 1 : 0) + (system.custom_document_links?.length ?? 0) + (system.website_url ? 1 : 0)
+  return count > 0 ? `${count} resource${count !== 1 ? 's' : ''}` : undefined
+}
+function componentsSubtitle(system: SystemCardSystem): string | undefined {
+  const count = system.system_components.length
+  if (count === 0) return undefined
+  const categories = new Set(system.system_components.map(c => c.components?.category ?? c.role ?? 'Component'))
+  return `${count} item${count !== 1 ? 's' : ''} · ${categories.size} categor${categories.size !== 1 ? 'ies' : 'y'}`
+}
+// Trade Desk sets showStockists=false ("staff are the local stockist") —
+// showing a count there but hiding the list it refers to would be a
+// confusing mismatch, so this subtitle is gated on the same flag.
+function stockistsSubtitle(stockists: SystemCardStockist[], showStockists: boolean): string | undefined {
+  if (!showStockists) return undefined
+  return stockists.length > 0 ? `${stockists.length} local stockist${stockists.length !== 1 ? 's' : ''}` : undefined
+}
+
 const SECTION_IDS = ['choose', 'attributes', 'guides', 'components', 'stockists'] as const
 type SectionId = typeof SECTION_IDS[number]
 
@@ -88,6 +163,8 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
               <SystemCardSection
                 id="choose"
                 title="Colours. Profiles. Finishes."
+                subtitle={chooseSubtitle(system)}
+                icon={<ChooseIcon />}
                 open={openSections.has('choose')}
                 onToggle={() => toggleSection('choose')}
                 disabled={noProfiles}
@@ -98,6 +175,8 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
               <SystemCardSection
                 id="attributes"
                 title="Attributes and Information"
+                subtitle={attributesSubtitle(system)}
+                icon={<AttributesIcon />}
                 open={openSections.has('attributes')}
                 onToggle={() => toggleSection('attributes')}
                 disabled={!hasAttributesContent(system)}
@@ -108,6 +187,8 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
               <SystemCardSection
                 id="guides"
                 title="Guides and Resources"
+                subtitle={guidesSubtitle(system)}
+                icon={<GuidesIcon />}
                 open={openSections.has('guides')}
                 onToggle={() => toggleSection('guides')}
               >
@@ -117,6 +198,8 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
               <SystemCardSection
                 id="components"
                 title="Components and Accessories"
+                subtitle={componentsSubtitle(system)}
+                icon={<ComponentsIcon />}
                 open={openSections.has('components')}
                 onToggle={() => toggleSection('components')}
                 disabled={noComponents}
@@ -127,6 +210,8 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
               <SystemCardSection
                 id="stockists"
                 title="Stockists"
+                subtitle={stockistsSubtitle(stockists, showStockists)}
+                icon={<StockistsIcon />}
                 open={openSections.has('stockists')}
                 onToggle={() => toggleSection('stockists')}
               >

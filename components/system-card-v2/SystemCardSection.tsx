@@ -28,10 +28,11 @@ function ChevronDownIcon() {
   )
 }
 
-export function SystemCardSection({ id, title, subtitle, open, onToggle, disabled, children }: {
+export function SystemCardSection({ id, title, subtitle, icon, open, onToggle, disabled, children }: {
   id: string
   title: string
   subtitle?: string
+  icon?: React.ReactNode
   open: boolean
   onToggle: () => void
   disabled?: boolean
@@ -73,7 +74,10 @@ export function SystemCardSection({ id, title, subtitle, open, onToggle, disable
           onClick={onToggle}
         >
           <span className={styles.sectionBarText}>
-            <span className={styles.sectionBarTitle}>{title}</span>
+            <span className={styles.sectionBarTitleRow}>
+              {icon && <span className={styles.sectionBarIcon} aria-hidden="true">{icon}</span>}
+              <span className={styles.sectionBarTitle}>{title}</span>
+            </span>
             {subtitle && <span className={styles.sectionBarSubtitle}>{subtitle}</span>}
           </span>
           <span className={styles.sectionChevron} aria-hidden="true"><ChevronDownIcon /></span>

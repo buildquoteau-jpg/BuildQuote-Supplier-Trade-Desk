@@ -3,10 +3,21 @@
 // The Cover — the first screen of the card object. Ported from Data
 // Studio's System Card V2 (components/system-card-v2/Cover.tsx), retyped
 // against this app's own SystemCardSystem (components/system-card/types.ts
-// — byte-identical to Data Studio's). Real photography only:
-// hero_image_url + gallery_images, deduplicated and capped at 10, swipeable
-// via native horizontal scroll-snap. Tapping a gallery photo opens a real
-// fullscreen lightbox (close/prev/next/counter).
+// — byte-identical to Data Studio's).
+//
+// Two layouts, chosen once by photo count (not pure CSS breakpoint
+// toggling, so a system with too few photos never renders a half-empty
+// grid): under 3 images, always the original single-swipe layout with the
+// scrim + white text overlay, at every width. At 3+ images, both layouts
+// render, CSS-toggled at 1024px: the swipe layout below that, and a
+// one-big-plus-four-small photo grid above it — a "Show all photos" pill
+// appears on the last small cell when there are more than 5 photos.
+// Manufacturer/title/category/statement move to a plain block below the
+// grid in that layout, since there's no single continuous photo to
+// overlay them onto.
+//
+// Tapping any photo (either layout) opens the same fullscreen lightbox
+// (close/prev/next/counter) at that photo's real index.
 
 import { useEffect, useRef, useState } from 'react'
 import type { SystemCardSystem } from '@/components/system-card/types'
@@ -45,6 +56,15 @@ function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
   )
 }
 
+function GridIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+    </svg>
+  )
+}
+
 export function Cover({ manufacturer, system }: {
   manufacturer: { name: string }
   system: SystemCardSystem
@@ -67,6 +87,8 @@ export function Cover({ manufacturer, system }: {
     }
     return list.slice(0, 10)
   })()
+
+  const showGrid = images.length >= 3
 
   const trackRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -126,65 +148,122 @@ export function Cover({ manufacturer, system }: {
     }
   }
 
+  const smallImages = images.slice(1, 5)
+
   return (
     <section className={styles.cover} aria-label={`${system.name} — ${manufacturer.name} System Card`}>
-      {images.length > 0 ? (
-        <div ref={trackRef} className={styles.gallery} onScroll={handleTrackScroll}>
-          {images.map((img, i) => (
-            <button
-              key={img.url}
-              type="button"
-              className={styles.galleryImgBtn}
-              onClick={() => openLightbox(i)}
-              aria-label={`Open ${img.alt} full screen`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className={styles.galleryImg}
-                src={img.url}
-                alt={img.alt}
-                style={i === 0 ? { objectPosition: `${posX}% ${posY}%` } : undefined}
+      <div className={showGrid ? `${styles.mobileHero} ${styles.mobileHeroHidesOnWide}` : styles.mobileHero}>
+        {images.length > 0 ? (
+          <div ref={trackRef} className={styles.gallery} onScroll={handleTrackScroll}>
+            {images.map((img, i) => (
+              <button
+                key={img.url}
+                type="button"
+                className={styles.galleryImgBtn}
+                onClick={() => openLightbox(i)}
+                aria-label={`Open ${img.alt} full screen`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  className={styles.galleryImg}
+                  src={img.url}
+                  alt={img.alt}
+                  style={i === 0 ? { objectPosition: `${posX}% ${posY}%` } : undefined}
+                />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.galleryFallback} />
+        )}
+        <div className={styles.scrim} />
+
+        {images.length > 1 && (
+          <div className={styles.galleryNav} role="tablist" aria-label="Product photos">
+            {images.map((img, i) => (
+              <button
+                key={img.url}
+                type="button"
+                role="tab"
+                aria-selected={i === activeIndex}
+                aria-label={`Photo ${i + 1} of ${images.length}`}
+                className={styles.galleryDot}
+                data-active={i === activeIndex}
+                onClick={() => goToSlide(i)}
               />
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className={styles.galleryFallback} />
-      )}
-      <div className={styles.scrim} />
+            ))}
+          </div>
+        )}
 
-      {images.length > 1 && (
-        <div className={styles.galleryNav} role="tablist" aria-label="Product photos">
-          {images.map((img, i) => (
-            <button
-              key={img.url}
-              type="button"
-              role="tab"
-              aria-selected={i === activeIndex}
-              aria-label={`Photo ${i + 1} of ${images.length}`}
-              className={styles.galleryDot}
-              data-active={i === activeIndex}
-              onClick={() => goToSlide(i)}
-            />
-          ))}
-        </div>
-      )}
+        <button type="button" className={styles.shareBtn} onClick={handleShare}>
+          <ShareIcon />
+          {shareState === 'copied' ? 'Link copied' : 'Share System Card'}
+        </button>
 
-      <button type="button" className={styles.shareBtn} onClick={handleShare}>
-        <ShareIcon />
-        {shareState === 'copied' ? 'Link copied' : 'Share System Card'}
-      </button>
-
-      <div className={styles.content}>
-        <div className={styles.contentInner}>
-          <p className={styles.manufacturer}>{manufacturer.name}</p>
-          <h1 className={styles.title}>{system.name}</h1>
-          <p className={styles.category}>
-            {system.category}{system.subcategory ? ` · ${system.subcategory}` : ''}
-          </p>
-          {statement && <p className={styles.statement}>{statement}</p>}
+        <div className={styles.content}>
+          <div className={styles.contentInner}>
+            <p className={styles.manufacturer}>{manufacturer.name}</p>
+            <h1 className={styles.title}>{system.name}</h1>
+            <p className={styles.category}>
+              {system.category}{system.subcategory ? ` · ${system.subcategory}` : ''}
+            </p>
+            {statement && <p className={styles.statement}>{statement}</p>}
+          </div>
         </div>
       </div>
+
+      {showGrid && (
+        <div className={styles.desktopHero}>
+          <div className={styles.heroGrid}>
+            <button
+              type="button"
+              className={styles.heroGridBig}
+              onClick={() => openLightbox(0)}
+              aria-label={`Open ${images[0].alt} full screen`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={styles.heroGridImg} src={images[0].url} alt={images[0].alt} style={{ objectPosition: `${posX}% ${posY}%` }} />
+            </button>
+
+            {smallImages.map((img, i) => {
+              const realIndex = i + 1
+              const isLastCell = i === smallImages.length - 1
+              const showPill = isLastCell && images.length > 5
+              return (
+                <button
+                  key={img.url}
+                  type="button"
+                  className={styles.heroGridSmall}
+                  onClick={() => openLightbox(showPill ? 0 : realIndex)}
+                  aria-label={showPill ? 'Show all photos' : `Open ${img.alt} full screen`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className={styles.heroGridImg} src={img.url} alt={img.alt} />
+                  {showPill && (
+                    <span className={styles.showAllPill}>
+                      <GridIcon /> Show all photos
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+
+            <button type="button" className={styles.desktopShareBtn} onClick={handleShare}>
+              <ShareIcon />
+              {shareState === 'copied' ? 'Link copied' : 'Share'}
+            </button>
+          </div>
+
+          <div className={styles.desktopTextBlock}>
+            <p className={styles.desktopManufacturer}>{manufacturer.name}</p>
+            <p className={styles.desktopTitle}>{system.name}</p>
+            <p className={styles.desktopCategory}>
+              {system.category}{system.subcategory ? ` · ${system.subcategory}` : ''}
+            </p>
+            {statement && <p className={styles.desktopStatement}>{statement}</p>}
+          </div>
+        </div>
+      )}
 
       {lightboxOpen && images[lightboxIndex] && (
         <div

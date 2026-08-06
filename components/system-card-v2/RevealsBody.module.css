@@ -10,13 +10,13 @@
    and stops at Share. */
 
 .page {
-  /* Flat light page chrome, matching the rest of the site (e.g. v6's
-     manufacturer landing page's #f5f7f9) — was a dark photographic-glow
-     backdrop; Melia asked for the two to match. Note: here .page renders
-     inside SystemDetailModal's own dark rgba(0,0,0,0.65) overlay, not as a
-     full page background — not visually confirmed (no login access to
-     Trade Desk/My Products), worth a look. */
-  background: #f5f7f9;
+  /* A quiet light vignette rather than a flat fill — brighter directly
+     behind the card, easing down to v6's #f5f7f9 and a touch deeper at the
+     far corners. Note: here .page renders inside SystemDetailModal's own
+     dark rgba(0,0,0,0.65) overlay, not as a full page background — not
+     visually confirmed (no login access to Trade Desk/My Products), worth
+     a look. */
+  background: radial-gradient(ellipse 60% 55% at 50% 32%, #ffffff 0%, #f5f7f9 55%, #eef1f4 100%);
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -39,7 +39,7 @@
   max-width: 440px;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 30px 80px -12px rgba(16, 14, 11, 0.28), 0 10px 26px -10px rgba(16, 14, 11, 0.16);
   background: #14161a;
 }
 
@@ -104,12 +104,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 2.2rem;
+  padding: 0.85rem 2.4rem;
   background: var(--ink);
   border: none;
   cursor: pointer;
   font-family: inherit;
-  min-height: 36px;
+  min-height: 58px;
   transition: background-color 0.15s ease;
 }
 
@@ -132,20 +132,34 @@
   text-align: center;
 }
 
+.sectionBarTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.sectionBarIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--paper);
+  opacity: 0.8;
+}
+
 .sectionBarTitle {
   display: block;
   font-family: var(--font-barlow-condensed), sans-serif;
   font-weight: 800;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   letter-spacing: -0.005em;
   color: var(--paper);
 }
 
 .sectionBarSubtitle {
   display: block;
-  font-size: 0.7rem;
-  color: rgba(246, 244, 239, 0.6);
-  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: rgba(246, 244, 239, 0.62);
+  margin-top: 0.25rem;
 }
 
 .sectionChevron {
