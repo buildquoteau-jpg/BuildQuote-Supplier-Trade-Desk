@@ -96,17 +96,25 @@
 
 .sectionHeading {
   margin: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  background: var(--paper);
 }
 
 .sectionBar {
   position: relative;
-  width: 100%;
-  display: flex;
+  /* Narrow — just wide enough for its own text plus room for the chevron
+     — not a full-width slab. Five of these read as a curated menu of
+     distinct pills, not one continuous black stripe cut into five. */
+  width: auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.85rem 2.4rem;
+  padding: 0.85rem 2.6rem;
   background: var(--ink);
   border: none;
+  border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
   min-height: 58px;
@@ -158,7 +166,9 @@
 .sectionBarSubtitle {
   display: block;
   font-size: 0.72rem;
-  color: rgba(246, 244, 239, 0.62);
+  /* Was 0.62 opacity — the dimming, not the white-on-black itself, was
+     what read as soft/uncrisp next to the bold title. */
+  color: rgba(246, 244, 239, 0.88);
   margin-top: 0.25rem;
 }
 

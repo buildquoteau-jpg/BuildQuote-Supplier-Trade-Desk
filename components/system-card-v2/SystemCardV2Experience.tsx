@@ -36,46 +36,6 @@ function ShareIcon() {
   )
 }
 
-// Small per-section glyphs — mostly cosmetic, but they're what breaks five
-// identical black bars into a scannable menu rather than a stack of
-// repeated buttons. aria-hidden in SystemCardSection; the title text alone
-// remains the accessible name.
-function ChooseIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="8" cy="12" r="5" /><circle cx="15" cy="8" r="5" /><circle cx="15" cy="16" r="5" />
-    </svg>
-  )
-}
-function AttributesIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" />
-      <circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
-function GuidesIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17z" /><line x1="20" y1="19" x2="6.5" y2="19" />
-    </svg>
-  )
-}
-function ComponentsIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z" />
-    </svg>
-  )
-}
-function StockistsIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-    </svg>
-  )
-}
 
 // One-line live previews shown on each closed bar.
 function chooseSubtitle(system: SystemCardSystem): string | undefined {
@@ -164,7 +124,6 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
                 id="choose"
                 title="Colours. Profiles. Finishes."
                 subtitle={chooseSubtitle(system)}
-                icon={<ChooseIcon />}
                 open={openSections.has('choose')}
                 onToggle={() => toggleSection('choose')}
                 disabled={noProfiles}
@@ -176,7 +135,6 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
                 id="attributes"
                 title="Attributes and Information"
                 subtitle={attributesSubtitle(system)}
-                icon={<AttributesIcon />}
                 open={openSections.has('attributes')}
                 onToggle={() => toggleSection('attributes')}
                 disabled={!hasAttributesContent(system)}
@@ -188,7 +146,6 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
                 id="guides"
                 title="Guides and Resources"
                 subtitle={guidesSubtitle(system)}
-                icon={<GuidesIcon />}
                 open={openSections.has('guides')}
                 onToggle={() => toggleSection('guides')}
               >
@@ -199,7 +156,6 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
                 id="components"
                 title="Components and Accessories"
                 subtitle={componentsSubtitle(system)}
-                icon={<ComponentsIcon />}
                 open={openSections.has('components')}
                 onToggle={() => toggleSection('components')}
                 disabled={noComponents}
@@ -211,7 +167,6 @@ export function SystemCardV2Experience({ system, stockists = [], showStockists =
                 id="stockists"
                 title="Stockists"
                 subtitle={stockistsSubtitle(stockists, showStockists)}
-                icon={<StockistsIcon />}
                 open={openSections.has('stockists')}
                 onToggle={() => toggleSection('stockists')}
               >

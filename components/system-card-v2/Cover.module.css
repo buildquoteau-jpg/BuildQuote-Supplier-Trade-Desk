@@ -128,7 +128,12 @@
 }
 
 .desktopTextBlock {
-  padding: 1.6rem 0.2rem 0.4rem;
+  /* .card (RevealsBody.module.css) is dark — .cover/.desktopHero paint
+     nothing opaque of their own, so without this the dark ink text here
+     was sitting directly on that dark background. Needs its own light
+     fill, same as every "paper" section below it. */
+  background: #ffffff;
+  padding: 1.6rem 1.25rem 1.4rem;
 }
 
 .desktopManufacturer {
