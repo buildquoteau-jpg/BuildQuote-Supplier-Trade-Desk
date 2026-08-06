@@ -10,9 +10,13 @@
    and stops at Share. */
 
 .page {
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 38%, rgba(58, 51, 40, 0.9) 0%, rgba(28, 26, 23, 0.4) 45%, rgba(13, 12, 10, 0) 75%),
-    #0d0c0a;
+  /* Flat light page chrome, matching the rest of the site (e.g. v6's
+     manufacturer landing page's #f5f7f9) — was a dark photographic-glow
+     backdrop; Melia asked for the two to match. Note: here .page renders
+     inside SystemDetailModal's own dark rgba(0,0,0,0.65) overlay, not as a
+     full page background — not visually confirmed (no login access to
+     Trade Desk/My Products), worth a look. */
+  background: #f5f7f9;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
