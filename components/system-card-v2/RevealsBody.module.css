@@ -67,16 +67,21 @@
 /* ── Expandable sections ─────────────────────────────────────────────────── */
 
 .sectionsList {
-  --ink: #1c1a17;
-  --ink-soft: #57534c;
-  --ink-faint: #8a8478;
+  /* Darkened/deepened across the board from the original pastel-and-hairline
+     palette — Melia flagged the live card as "dull" and hard to read in
+     bright light. Every one of these tokens feeds table borders, body text
+     and badges throughout this file, so tuning them here is the single
+     highest-leverage fix. */
+  --ink: #100e0b;
+  --ink-soft: #35312b;
+  --ink-faint: #6b6459;
   --paper: #ffffff;
   --raised: #ffffff;
-  --line: rgba(28, 26, 23, 0.13);
-  --line-strong: rgba(28, 26, 23, 0.24);
-  --accent: #185d7a;
-  --accent-soft: rgba(24, 93, 122, 0.08);
-  --success: #16a34a;
+  --line: rgba(16, 14, 11, 0.22);
+  --line-strong: rgba(16, 14, 11, 0.4);
+  --accent: #0d4258;
+  --accent-soft: rgba(13, 66, 88, 0.12);
+  --success: #15803d;
 
   background: var(--paper);
 }
@@ -328,18 +333,18 @@
 }
 
 .badge[data-tone='performance'] {
-  background: #dceefc;
-  color: #0c4a6e;
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .badge[data-tone='neutral'] {
-  background: #e9e5dc;
-  color: var(--ink-soft);
+  background: var(--ink-soft);
+  color: #ffffff;
 }
 
 .badge[data-tone='success'] {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--success);
+  color: #ffffff;
 }
 
 .specGroup {
@@ -462,7 +467,7 @@
   padding: 0.85rem 1rem;
   min-height: 44px;
   background: var(--accent-soft);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--accent);
   border-radius: 8px;
   text-decoration: none;
   color: inherit;
@@ -472,7 +477,7 @@
 
 .resourceRow:hover {
   border-color: var(--accent);
-  background: #d7e9f2;
+  background: #cfe3ea;
 }
 
 .resourceRow:active {
