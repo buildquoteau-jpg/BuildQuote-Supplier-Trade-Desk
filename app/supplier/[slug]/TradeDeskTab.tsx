@@ -42,15 +42,39 @@ function categoryStyle(category: string) {
 // Weighted, fuzzy, ranked — a typed word landing in the product name counts
 // for far more than one only found in the description, and a single typo
 // ("claddng") still matches via fuzzyIncludes' bounded edit distance.
+//
+// Every text-bearing field the System Card can actually render is searchable
+// (name, colours, profiles, custom attributes, performance specs, notes,
+// description, linked components) — not just the headline fields — so a
+// customer's own wording ("blackbutt", "BAL 29", "corner trim") finds a
+// match wherever it happens to live on the card.
 
 const FIELD_WEIGHT = {
   name: 10,
   productCode: 8,
   category: 6,
   colour: 6,
+  profile: 6,
+  customAttribute: 6,
   manufacturer: 4,
+  specs: 4,
   description: 2,
+  notes: 2,
+  components: 2,
 } as const
+
+// Mirrors the Performance pill row in AttributesInfoReveal.tsx exactly, so
+// search matches whatever text is actually shown to the customer there.
+function specsTextOf(item: SystemCardSystem): string {
+  const parts: string[] = []
+  if (item.moisture_resistant) parts.push('Moisture resistant')
+  if (item.bal_rating) parts.push(`BAL ${item.bal_rating}`)
+  if (item.fire_rating) parts.push(`FRL ${item.fire_rating}`)
+  if (item.acoustic_rating) parts.push(item.acoustic_rating)
+  if (item.structural_grade) parts.push(item.structural_grade)
+  if (item.australian_made) parts.push('Australian made')
+  return parts.join(' ')
+}
 
 function searchItemsScored(items: SystemCardSystem[], query: string): { item: SystemCardSystem; score: number }[] {
   const q = query.trim()
@@ -63,8 +87,26 @@ function searchItemsScored(items: SystemCardSystem[], query: string): { item: Sy
     { text: item.product_code ?? '', weight: FIELD_WEIGHT.productCode },
     { text: [item.category, item.subcategory ?? ''].join(' '), weight: FIELD_WEIGHT.category },
     { text: item.system_colours.map(c => c.colour_name).join(' '), weight: FIELD_WEIGHT.colour },
+    {
+      text: item.system_profiles
+        .map(p => [p.profile_name, p.name, p.product_code].filter(Boolean).join(' '))
+        .join(' '),
+      weight: FIELD_WEIGHT.profile,
+    },
+    {
+      text: (item.custom_technical_attributes ?? []).map(a => `${a.label} ${a.value}`).join(' '),
+      weight: FIELD_WEIGHT.customAttribute,
+    },
     { text: item.manufacturer?.name ?? '', weight: FIELD_WEIGHT.manufacturer },
+    { text: specsTextOf(item), weight: FIELD_WEIGHT.specs },
     { text: item.description ?? '', weight: FIELD_WEIGHT.description },
+    { text: item.notes ?? '', weight: FIELD_WEIGHT.notes },
+    {
+      text: item.system_components
+        .map(c => [c.components?.name, c.components?.description, c.components?.sku, c.components?.category].filter(Boolean).join(' '))
+        .join(' '),
+      weight: FIELD_WEIGHT.components,
+    },
   ]
 
   const scored = items
