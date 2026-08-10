@@ -70,6 +70,8 @@ export type ProductionSystem = {
   install_guide_urls: { label: string; url: string }[] | null
   design_guide_url: string | null
   tech_data_url: string | null
+  custom_document_links: { label: string; url: string }[] | null
+  custom_technical_attributes: { label: string; value: string }[] | null
   system_colours: ProductionColour[]
   system_profiles: ProductionProfile[]
   system_components: ProductionComponentEntry[]
@@ -122,8 +124,8 @@ export function adaptProductionSystem(
     install_guide_urls: system.install_guide_urls,
     design_guide_url: system.design_guide_url,
     tech_data_url: system.tech_data_url,
-    custom_document_links: null,
-    custom_technical_attributes: null,
+    custom_document_links: system.custom_document_links,
+    custom_technical_attributes: system.custom_technical_attributes,
     manufacturer: manufacturer
       ? { name: manufacturer.name, slug: manufacturer.slug, logo_url: manufacturer.logo_url }
       : null,

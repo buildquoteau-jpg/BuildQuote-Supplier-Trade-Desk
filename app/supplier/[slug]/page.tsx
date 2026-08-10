@@ -217,6 +217,7 @@ export default function SupplierPortalPage({ params }: { params: Promise<{ slug:
           id, name, product_code, slug, category, subcategory, sort_order,
           description, hero_image_url, hero_image_position_x, hero_image_position_y,
           website_url, install_guide_urls, design_guide_url, tech_data_url,
+          custom_document_links, custom_technical_attributes,
           notes, fire_rating, acoustic_rating, moisture_resistant,
           structural_grade, bal_rating, australian_made,
           system_colours ( colour_name, image_url, sort_order, is_stocked ),
