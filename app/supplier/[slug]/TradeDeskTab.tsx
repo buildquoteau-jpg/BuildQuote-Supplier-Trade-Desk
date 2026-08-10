@@ -47,6 +47,7 @@ const FIELD_WEIGHT = {
   name: 10,
   productCode: 8,
   category: 6,
+  colour: 6,
   manufacturer: 4,
   description: 2,
 } as const
@@ -61,6 +62,7 @@ function searchItemsScored(items: SystemCardSystem[], query: string): { item: Sy
     { text: item.name, weight: FIELD_WEIGHT.name },
     { text: item.product_code ?? '', weight: FIELD_WEIGHT.productCode },
     { text: [item.category, item.subcategory ?? ''].join(' '), weight: FIELD_WEIGHT.category },
+    { text: item.system_colours.map(c => c.colour_name).join(' '), weight: FIELD_WEIGHT.colour },
     { text: item.manufacturer?.name ?? '', weight: FIELD_WEIGHT.manufacturer },
     { text: item.description ?? '', weight: FIELD_WEIGHT.description },
   ]
