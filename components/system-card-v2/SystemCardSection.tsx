@@ -2,11 +2,9 @@
 
 // Reusable expandable "layer" of the System Card — a horizontal bar that
 // reveals its content directly beneath itself, independent of every other
-// section's open/closed state. Ported byte-for-byte from Data Studio's
-// components/system-card-v2/SystemCardSection.tsx. Uses the CSS grid
-// 0fr -> 1fr technique (see RevealsBody.module.css: .sectionGrid/
-// .sectionInner/.sectionPanel) rather than a fixed max-height, since section
-// content varies a lot in length.
+// section's open/closed state. Uses the CSS grid 0fr -> 1fr technique (see
+// RevealsBody.module.css: .sectionGrid/.sectionInner/.sectionPanel) rather
+// than a fixed max-height, since section content varies a lot in length.
 //
 // Content stays mounted at all times (just visually collapsed to 0 height)
 // so the grid transition has something to measure on first open, and so
@@ -20,18 +18,9 @@
 import { useEffect, useRef } from 'react'
 import styles from './RevealsBody.module.css'
 
-function ChevronDownIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  )
-}
-
-export function SystemCardSection({ id, title, subtitle, open, onToggle, disabled, children }: {
+export function SystemCardSection({ id, title, open, onToggle, disabled, children }: {
   id: string
   title: string
-  subtitle?: string
   open: boolean
   onToggle: () => void
   disabled?: boolean
@@ -41,14 +30,11 @@ export function SystemCardSection({ id, title, subtitle, open, onToggle, disable
   const panelRef = useRef<HTMLDivElement>(null)
   const mounted = useRef(false)
 
-  // Keep closed-section content out of the tab order / a11y tree.
   useEffect(() => {
     const el = panelRef.current
     if (el) (el as HTMLDivElement & { inert: boolean }).inert = !open
   }, [open])
 
-  // Gentle, minimal scroll so a newly opened section isn't left off-screen —
-  // never on close, never past the heading, never to the top of the page.
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
     if (!open) return
@@ -74,9 +60,7 @@ export function SystemCardSection({ id, title, subtitle, open, onToggle, disable
         >
           <span className={styles.sectionBarText}>
             <span className={styles.sectionBarTitle}>{title}</span>
-            {subtitle && <span className={styles.sectionBarSubtitle}>{subtitle}</span>}
           </span>
-          <span className={styles.sectionChevron} aria-hidden="true"><ChevronDownIcon /></span>
         </button>
       </h2>
       <div className={styles.sectionGrid} data-open={open}>

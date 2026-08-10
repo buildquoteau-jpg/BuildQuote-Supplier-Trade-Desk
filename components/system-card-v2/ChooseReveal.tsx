@@ -1,28 +1,48 @@
 'use client'
 
-// Choose screen — ported byte-for-byte (aside from the type import) from
-// Data Studio's System Card V2 (components/system-card-v2/ChooseReveal.tsx).
-//
-// Profiles are NOT alternatives to each other — a system can carry several
-// distinct roles (main profile, edge board, etc.) — so selection is an
-// independent toggle per row, not a radio group. Role label is derived from
-// the real `name` field (falls back to "Main profile" for the first/lowest
-// sort_order item, "Edge board" when the name says so, "Additional profile"
-// otherwise), not hardcoded to any one manufacturer's data.
+// Choose screen. Profiles are NOT alternatives to each other — a system
+// can carry several distinct roles (main profile, edge board, etc.) — so
+// selection is an independent toggle per row, not a radio group. Role
+// label is derived from the real `name` field (falls back to "Main
+// profile" for the first/lowest sort_order item, "Edge board" when the
+// name says so, "Additional profile" otherwise), not hardcoded to any one
+// manufacturer's data.
 
 import { useState } from 'react'
 import type { SystemCardColour, SystemCardProfile } from '@/components/system-card/types'
 import { useSelection } from './SelectionContext'
 import styles from './RevealsBody.module.css'
 
-function SwatchImage({ url, alt }: { url: string | null; alt: string }) {
+// Real photo when there's a usable image_url; otherwise a compact name
+// pill instead of an empty placeholder box.
+function ColourOption({ colour, pressed, onToggle }: {
+  colour: SystemCardColour
+  pressed: boolean
+  onToggle: () => void
+}) {
   const [errored, setErrored] = useState(false)
-  if (!url || errored) {
-    return <span className={styles.swatchImg} style={{ background: '#eeece6' }} />
+  // Some rows carry invisible leading/trailing whitespace on image_url
+  // (e.g. a BOM from a spreadsheet-based import) which silently breaks the
+  // <img> load in the browser — trim before use, not just the check.
+  const imageUrl = colour.image_url?.trim()
+
+  if (!imageUrl || errored) {
+    return (
+      <button type="button" className={styles.swatchPill} aria-pressed={pressed} onClick={onToggle}>
+        {colour.colour_name}
+      </button>
+    )
   }
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className={styles.swatchImg} src={url} alt={alt} onError={() => setErrored(true)} />
+    <button type="button" className={styles.swatch} aria-pressed={pressed} onClick={onToggle}>
+      <span className={styles.swatchImgWrap}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.swatchImg} src={imageUrl} alt="" onError={() => setErrored(true)} />
+        {pressed && <span className={styles.swatchCheck}><CheckIcon /></span>}
+      </span>
+      <span className={styles.swatchLabel}>{colour.colour_name}</span>
+    </button>
   )
 }
 
@@ -35,8 +55,9 @@ function CheckIcon() {
 }
 
 function roleLabel(p: SystemCardProfile, index: number): string {
-  const name = `${p.name ?? ''} ${p.profile_name ?? ''}`.toLowerCase()
-  if (name.includes('edge')) return 'Edge board'
+  if (p.name?.trim()) return p.name.trim()
+  const text = (p.profile_name ?? '').toLowerCase()
+  if (text.includes('edge')) return 'Edge board'
   if (index === 0) return 'Main profile'
   return 'Additional profile'
 }
@@ -58,19 +79,12 @@ export function ChooseReveal({ colours, profiles }: {
             {colours.map(c => {
               const pressed = colourName === c.colour_name
               return (
-                <button
+                <ColourOption
                   key={c.colour_name}
-                  type="button"
-                  className={styles.swatch}
-                  aria-pressed={pressed}
-                  onClick={() => setColourName(pressed ? null : c.colour_name)}
-                >
-                  <span className={styles.swatchImgWrap}>
-                    <SwatchImage url={c.image_url} alt="" />
-                    {pressed && <span className={styles.swatchCheck}><CheckIcon /></span>}
-                  </span>
-                  <span className={styles.swatchLabel}>{c.colour_name}</span>
-                </button>
+                  colour={c}
+                  pressed={pressed}
+                  onToggle={() => setColourName(pressed ? null : c.colour_name)}
+                />
               )
             })}
           </div>
@@ -80,47 +94,43 @@ export function ChooseReveal({ colours, profiles }: {
       {profiles.length > 0 && (
         <>
           <p className={styles.groupLabel}>Profile</p>
-          <div className={styles.specTableScroll}>
-            <table className={styles.specTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Specs</th>
-                  <th>Part no</th>
-                  <th>UOM</th>
-                  <th>Select</th>
-                </tr>
-              </thead>
-              <tbody>
-                {profiles.map((p, i) => {
-                  const pressed = profileNames.includes(p.profile_name ?? '')
-                  const dims = [p.length_mm && `${p.length_mm}mm`, p.width_mm && `${p.width_mm}mm`, p.thickness_mm && `${p.thickness_mm}mm`]
-                    .filter(Boolean).join(' × ') || p.dimensions
-                  return (
-                    <tr key={p.id}>
-                      <td className={styles.specTableName}>
-                        <span className={styles.profileRole}>{roleLabel(p, i)}</span>
-                        {p.profile_name}
-                      </td>
-                      <td>{dims || '—'}</td>
-                      <td>{p.product_code ?? '—'}</td>
-                      <td>{p.uom ?? '—'}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className={styles.tableCheck}
-                          aria-pressed={pressed}
-                          aria-label={`Select ${p.profile_name ?? 'profile'}`}
-                          onClick={() => toggleProfileName(p.profile_name ?? '')}
-                        >
-                          <CheckIcon />
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+          <div className={styles.itemList}>
+            {profiles.map((p, i) => {
+              const pressed = profileNames.includes(p.profile_name ?? '')
+              const dims = [p.length_mm && `${p.length_mm}mm`, p.width_mm && `${p.width_mm}mm`, p.thickness_mm && `${p.thickness_mm}mm`]
+                .filter(Boolean).join(' × ') || p.dimensions
+              return (
+                <div className={styles.itemRow} data-selected={pressed} key={p.id}>
+                  <div className={styles.itemRowText}>
+                    <span className={styles.profileRole}>{roleLabel(p, i)}</span>
+                    <span className={styles.itemRowName}>{p.profile_name}</span>
+                    <div className={styles.itemMetaRow}>
+                      <span className={styles.itemMetaField}>
+                        <span className={styles.itemMetaLabel}>Specs</span>
+                        <span className={styles.itemMetaValue}>{dims || '—'}</span>
+                      </span>
+                      <span className={styles.itemMetaField}>
+                        <span className={styles.itemMetaLabel}>Part no</span>
+                        <span className={styles.itemMetaValue}>{p.product_code ?? '—'}</span>
+                      </span>
+                      <span className={styles.itemMetaField}>
+                        <span className={styles.itemMetaLabel}>UOM</span>
+                        <span className={styles.itemMetaValue}>{p.uom ?? '—'}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.tableCheck}
+                    aria-pressed={pressed}
+                    aria-label={`Select ${p.profile_name ?? 'profile'}`}
+                    onClick={() => toggleProfileName(p.profile_name ?? '')}
+                  >
+                    <CheckIcon />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </>
       )}

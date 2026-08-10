@@ -40,7 +40,7 @@ export function GuidesResourcesReveal({ system }: { system: SystemCardSystem }) 
       {resources.map(r => (
         <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer" className={styles.resourceRow}>
           <span className={styles.resourceMeta}>{r.type} · {hostOf(r.url)}</span>
-          <span className={styles.resourceLabel}>{r.label} ↗</span>
+          <span className={styles.resourceLabel}>{r.label}</span>
         </a>
       ))}
     </div>

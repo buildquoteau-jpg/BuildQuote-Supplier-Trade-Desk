@@ -1,20 +1,17 @@
 'use client'
 
-// The Cover — the first screen of the card object. Ported from Data
-// Studio's System Card V2 (components/system-card-v2/Cover.tsx), retyped
-// against this app's own SystemCardSystem (components/system-card/types.ts
-// — byte-identical to Data Studio's).
+// The Cover — the first screen of the card object. Airbnb-listing pattern:
+// the photo stays clean and bright -- no scrim, nothing written on top of
+// it -- and manufacturer/title/category/statement sit in their own plain
+// white block underneath.
 //
 // Two layouts, chosen once by photo count (not pure CSS breakpoint
 // toggling, so a system with too few photos never renders a half-empty
-// grid): under 3 images, always the original single-swipe layout with the
-// scrim + white text overlay, at every width. At 3+ images, both layouts
-// render, CSS-toggled at 1024px: the swipe layout below that, and a
-// one-big-plus-four-small photo grid above it — a "Show all photos" pill
-// appears on the last small cell when there are more than 5 photos.
-// Manufacturer/title/category/statement move to a plain block below the
-// grid in that layout, since there's no single continuous photo to
-// overlay them onto.
+// grid): under 3 images, always the single-swipe layout, at every width.
+// At 3+ images, both layouts render, CSS-toggled at 1024px: the swipe
+// layout below that, and a one-big-plus-four-small photo grid above it --
+// a "Show all photos" pill appears on the last small cell when there are
+// more than 5 photos.
 //
 // Tapping any photo (either layout) opens the same fullscreen lightbox
 // (close/prev/next/counter) at that photo's real index.
@@ -32,9 +29,18 @@ function firstSentence(text: string | null): string | null {
 
 function ShareIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-      <line x1="8.6" y1="10.6" x2="15.4" y2="6.4" /><line x1="8.6" y1="13.4" x2="15.4" y2="17.6" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 15V4" />
+      <path d="M7.5 8.5 12 4l4.5 4.5" />
+      <path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   )
 }
@@ -75,14 +81,18 @@ export function Cover({ manufacturer, system }: {
   const images = (() => {
     const seen = new Set<string>()
     const list: { url: string; alt: string }[] = []
-    if (system.hero_image_url) {
-      list.push({ url: system.hero_image_url, alt: `${system.name} by ${manufacturer.name}` })
-      seen.add(system.hero_image_url)
+    // Trim -- some rows carry stray whitespace on image URLs that silently
+    // breaks <img> loading without a normal catchable error.
+    const heroUrl = system.hero_image_url?.trim()
+    if (heroUrl) {
+      list.push({ url: heroUrl, alt: `${system.name} by ${manufacturer.name}` })
+      seen.add(heroUrl)
     }
     for (const g of system.gallery_images ?? []) {
-      if (g.url && !seen.has(g.url)) {
-        list.push({ url: g.url, alt: g.alt || `${system.name} by ${manufacturer.name}` })
-        seen.add(g.url)
+      const url = g.url?.trim()
+      if (url && !seen.has(url)) {
+        list.push({ url, alt: g.alt || `${system.name} by ${manufacturer.name}` })
+        seen.add(url)
       }
     }
     return list.slice(0, 10)
@@ -153,62 +163,65 @@ export function Cover({ manufacturer, system }: {
   return (
     <section className={styles.cover} aria-label={`${system.name} — ${manufacturer.name} System Card`}>
       <div className={showGrid ? `${styles.mobileHero} ${styles.mobileHeroHidesOnWide}` : styles.mobileHero}>
-        {images.length > 0 ? (
-          <div ref={trackRef} className={styles.gallery} onScroll={handleTrackScroll}>
-            {images.map((img, i) => (
-              <button
-                key={img.url}
-                type="button"
-                className={styles.galleryImgBtn}
-                onClick={() => openLightbox(i)}
-                aria-label={`Open ${img.alt} full screen`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className={styles.galleryImg}
-                  src={img.url}
-                  alt={img.alt}
-                  style={i === 0 ? { objectPosition: `${posX}% ${posY}%` } : undefined}
+        <div className={styles.mobileHeroPhoto}>
+          {images.length > 0 ? (
+            <div ref={trackRef} className={styles.gallery} onScroll={handleTrackScroll}>
+              {images.map((img, i) => (
+                <button
+                  key={img.url}
+                  type="button"
+                  className={styles.galleryImgBtn}
+                  onClick={() => openLightbox(i)}
+                  aria-label={`Open ${img.alt} full screen`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className={styles.galleryImg}
+                    src={img.url}
+                    alt={img.alt}
+                    style={i === 0 ? { objectPosition: `${posX}% ${posY}%` } : undefined}
+                  />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.galleryFallback} />
+          )}
+
+          {images.length > 1 && (
+            <div className={styles.galleryNav} role="tablist" aria-label="Product photos">
+              {images.map((img, i) => (
+                <button
+                  key={img.url}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === activeIndex}
+                  aria-label={`Photo ${i + 1} of ${images.length}`}
+                  className={styles.galleryDot}
+                  data-active={i === activeIndex}
+                  onClick={() => goToSlide(i)}
                 />
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.galleryFallback} />
-        )}
-        <div className={styles.scrim} />
+              ))}
+            </div>
+          )}
 
-        {images.length > 1 && (
-          <div className={styles.galleryNav} role="tablist" aria-label="Product photos">
-            {images.map((img, i) => (
-              <button
-                key={img.url}
-                type="button"
-                role="tab"
-                aria-selected={i === activeIndex}
-                aria-label={`Photo ${i + 1} of ${images.length}`}
-                className={styles.galleryDot}
-                data-active={i === activeIndex}
-                onClick={() => goToSlide(i)}
-              />
-            ))}
-          </div>
-        )}
+          <button
+            type="button"
+            className={styles.shareBtn}
+            onClick={handleShare}
+            aria-label={shareState === 'copied' ? 'Link copied' : 'Share System Card'}
+          >
+            {shareState === 'copied' ? <CheckIcon /> : <ShareIcon />}
+          </button>
+        </div>
 
-        <button type="button" className={styles.shareBtn} onClick={handleShare}>
-          <ShareIcon />
-          {shareState === 'copied' ? 'Link copied' : 'Share System Card'}
-        </button>
-
-        <div className={styles.content}>
-          <div className={styles.contentInner}>
-            <p className={styles.manufacturer}>{manufacturer.name}</p>
-            <h1 className={styles.title}>{system.name}</h1>
-            <p className={styles.category}>
-              {system.category}{system.subcategory ? ` · ${system.subcategory}` : ''}
-            </p>
-            {statement && <p className={styles.statement}>{statement}</p>}
-          </div>
+        <div className={styles.mobileTextBlock}>
+          <p className={styles.manufacturer}>{manufacturer.name}</p>
+          <h1 className={styles.title}>{system.name}</h1>
+          <p className={styles.category}>
+            {system.category}{system.subcategory ? ` · ${system.subcategory}` : ''}
+          </p>
+          {statement && <p className={styles.statement}>{statement}</p>}
         </div>
       </div>
 
@@ -248,9 +261,13 @@ export function Cover({ manufacturer, system }: {
               )
             })}
 
-            <button type="button" className={styles.desktopShareBtn} onClick={handleShare}>
-              <ShareIcon />
-              {shareState === 'copied' ? 'Link copied' : 'Share'}
+            <button
+              type="button"
+              className={styles.desktopShareBtn}
+              onClick={handleShare}
+              aria-label={shareState === 'copied' ? 'Link copied' : 'Share System Card'}
+            >
+              {shareState === 'copied' ? <CheckIcon /> : <ShareIcon />}
             </button>
           </div>
 

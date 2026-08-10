@@ -1,21 +1,11 @@
-/* System Card V2 — the card object itself: a rounded frame on a dark
-   backdrop that grows as its independent sections are opened. The page
-   itself is the scroll container — there is no inner clipped viewport, no
-   fixed card height. Ported from Data Studio's System Card V2
-   (components/system-card-v2/RevealsBody.module.css), with two changes:
-   fonts reference this app's existing next/font variables instead of a
-   separately-injected Google Fonts stylesheet, and an "Add to shopping
-   list" button (.addToListBtn) was added at the bottom for Trade Desk's
-   real cart — the Data Studio source only ever fills a live preview table
-   and stops at Share. */
+/* System Card V2 — the card object itself: a rounded frame that grows as
+   its independent sections are opened. The page itself is the scroll
+   container — there is no inner clipped viewport, no fixed card height.
+   Note: here .page renders inside SystemDetailModal's own dark
+   rgba(0,0,0,0.65) overlay, not as a full page background — not visually
+   confirmed (no login access to Trade Desk/My Products), worth a look. */
 
 .page {
-  /* A quiet light vignette rather than a flat fill — brighter directly
-     behind the card, easing down to v6's #f5f7f9 and a touch deeper at the
-     far corners. Note: here .page renders inside SystemDetailModal's own
-     dark rgba(0,0,0,0.65) overlay, not as a full page background — not
-     visually confirmed (no login access to Trade Desk/My Products), worth
-     a look. */
   background: radial-gradient(ellipse 60% 55% at 50% 32%, #ffffff 0%, #f5f7f9 55%, #eef1f4 100%);
   min-height: 100vh;
   min-height: 100dvh;
@@ -40,7 +30,7 @@
   border-radius: 22px;
   overflow: hidden;
   box-shadow: 0 30px 80px -12px rgba(16, 14, 11, 0.28), 0 10px 26px -10px rgba(16, 14, 11, 0.16);
-  background: #14161a;
+  background: #ffffff;
 }
 
 @media (min-width: 640px) {
@@ -71,14 +61,9 @@
 /* ── Expandable sections ─────────────────────────────────────────────────── */
 
 .sectionsList {
-  /* Darkened/deepened across the board from the original pastel-and-hairline
-     palette — Melia flagged the live card as "dull" and hard to read in
-     bright light. Every one of these tokens feeds table borders, body text
-     and badges throughout this file, so tuning them here is the single
-     highest-leverage fix. */
   --ink: #100e0b;
   --ink-soft: #35312b;
-  --ink-faint: #6b6459;
+  --ink-faint: #544d40;
   --paper: #ffffff;
   --raised: #ffffff;
   --line: rgba(16, 14, 11, 0.22);
@@ -98,31 +83,37 @@
   margin: 0;
   display: flex;
   justify-content: center;
-  padding: 0.55rem 1rem;
+  padding: 0.1rem 1rem;
   background: var(--paper);
 }
 
 .sectionBar {
   position: relative;
-  /* Narrow — just wide enough for its own text plus room for the chevron
-     — not a full-width slab. Five of these read as a curated menu of
-     distinct pills, not one continuous black stripe cut into five. */
+  /* Narrow — a slim drawer-pull strip, not a big rounded pill. Just wide
+     enough for its own text — five of these read as a curated menu of
+     distinct headings, not a black stripe cut into five. Height is well
+     under the usual 44px tap-target guideline by deliberate choice. */
   width: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.85rem 2.6rem;
-  background: var(--ink);
+  padding: 0.15rem 1.5rem;
+  background: none;
   border: none;
-  border-radius: 999px;
+  border-radius: 0;
   cursor: pointer;
   font-family: inherit;
-  min-height: 58px;
-  transition: background-color 0.15s ease;
+  min-height: 36px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .sectionBar:hover:not(:disabled) {
-  background: #2a2620;
+  opacity: 0.6;
+}
+
+.sectionBar:active:not(:disabled) {
+  opacity: 0.45;
+  transform: scale(0.98);
 }
 
 .sectionBar:focus-visible {
@@ -150,7 +141,7 @@
 .sectionBarIcon {
   display: flex;
   flex-shrink: 0;
-  color: var(--paper);
+  color: var(--ink);
   opacity: 0.8;
 }
 
@@ -158,38 +149,17 @@
   display: block;
   font-family: var(--font-barlow-condensed), sans-serif;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   letter-spacing: -0.005em;
-  color: var(--paper);
-}
-
-.sectionBarSubtitle {
-  display: block;
-  font-size: 0.72rem;
-  /* Was 0.62 opacity — the dimming, not the white-on-black itself, was
-     what read as soft/uncrisp next to the bold title. */
-  color: rgba(246, 244, 239, 0.88);
-  margin-top: 0.25rem;
-}
-
-.sectionChevron {
-  position: absolute;
-  right: 1.25rem;
-  top: 50%;
-  display: flex;
-  color: var(--paper);
-  transform: translateY(-50%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.sectionBar[aria-expanded='true'] .sectionChevron {
-  transform: translateY(-50%) rotate(180deg);
+  color: var(--ink);
 }
 
 .sectionGrid {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Slow, deliberate glide that decelerates hard into the stop — reads as
+     the drawer settling into place rather than just stopping. */
+  transition: grid-template-rows 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sectionGrid[data-open='true'] {
@@ -204,24 +174,36 @@
 .sectionPanel {
   padding: 0.25rem 1.25rem 2rem;
   opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* A real travel distance, not a nudge — and opacity ramps up much faster
+     than the transform, so content is fully visible and legible while it's
+     still visibly gliding into place. That's what reads as "sliding"
+     rather than "growing". */
+  transform: translateY(-28px);
+  transition: opacity 0.45s ease, transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sectionGrid[data-open='true'] .sectionPanel {
   opacity: 1;
   transform: translateY(0);
-  transition-delay: 0.08s;
+  transition-delay: 0.1s;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sectionGrid, .sectionPanel, .sectionChevron {
+  .sectionGrid, .sectionPanel {
     transition: none;
   }
 }
 
+/* Always-visible "Your materials list" + Add-to-list action — sits below
+   the accordion bars in normal page flow, not inside any of them, so it's
+   never hidden behind a tap. */
+.materialsListBar {
+  padding: 0.65rem 1.25rem 0.65rem;
+  border-top: 1px solid var(--line);
+}
+
 .cardClose {
-  padding: 1.5rem 1.25rem 2rem;
+  padding: 0.85rem 1.25rem 1.25rem;
   text-align: center;
   border-top: 1px solid var(--line);
 }
@@ -237,7 +219,7 @@
   border: none;
   border-radius: 5px;
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -251,13 +233,13 @@
 /* ── Reveal 1 — Choose ─────────────────────────────────────────────────── */
 
 .chooseHint {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   margin: 0 0 1.5rem;
 }
 
 .groupLabel {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -272,6 +254,7 @@
 .swatchRow {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 1rem;
   margin-bottom: 0.5rem;
 }
@@ -325,16 +308,40 @@
 }
 
 .swatchLabel {
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-weight: 600;
   color: var(--ink);
   text-align: center;
   line-height: 1.25;
 }
 
+/* Colours with no swatch photo — a compact name pill instead of an empty
+   placeholder box. */
+.swatchPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1.5px solid var(--line-strong);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.swatchPill[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
 .profileRole {
   display: block;
-  font-size: 0.66rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -344,35 +351,95 @@
 
 /* ── Attributes and Information ───────────────────────────────────────── */
 
-.badgeRow {
+/* Every attribute as one pill, each fact its own soft hue -- solid pastel
+   fills (not a tinted/alpha wash) so they read as clearly coloured rather
+   than faded, with a same-hue solid border instead of a translucent one. */
+.attributePillRow {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  margin-bottom: 1.75rem;
 }
 
-.badge {
+.attributePill {
   display: inline-block;
-  font-size: 0.66rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   border-radius: 999px;
   padding: 0.3rem 0.7rem;
+  border: 1px solid transparent;
 }
 
-.badge[data-tone='performance'] {
-  background: var(--accent);
-  color: #ffffff;
+.attributePill[data-tone='moisture'] {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
 }
 
-.badge[data-tone='neutral'] {
-  background: var(--ink-soft);
-  color: #ffffff;
+.attributePill[data-tone='bal'] {
+  background: #ffedd5;
+  color: #c2410c;
+  border-color: #fed7aa;
 }
 
-.badge[data-tone='success'] {
-  background: var(--success);
-  color: #ffffff;
+.attributePill[data-tone='fire'] {
+  background: #fce7f3;
+  color: #be185d;
+  border-color: #fbcfe8;
+}
+
+.attributePill[data-tone='acoustic'] {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border-color: #e9d5ff;
+}
+
+.attributePill[data-tone='structural'] {
+  background: #fef9c3;
+  color: #a16207;
+  border-color: #fde68a;
+}
+
+.attributePill[data-tone='australian'] {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.attributePill[data-tone='colourways'] {
+  background: #ccfbf1;
+  color: #0f766e;
+  border-color: #99f6e4;
+}
+
+.attributePill[data-tone='custom0'] {
+  background: #e0e7ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.attributePill[data-tone='custom1'] {
+  background: #cffafe;
+  color: #0e7490;
+  border-color: #a5f3fc;
+}
+
+.attributePill[data-tone='custom2'] {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.attributePill[data-tone='custom3'] {
+  background: #ffe4e6;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+.attributePill[data-tone='custom4'] {
+  background: #ecfccb;
+  color: #4d7c0f;
+  border-color: #d9f99d;
 }
 
 .specGroup {
@@ -384,7 +451,7 @@
 }
 
 .specGroupLabel {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -393,7 +460,7 @@
 }
 
 .descriptionText {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--ink-soft);
   line-height: 1.6;
   margin: 0;
@@ -408,29 +475,6 @@
 
 .specBox + .specBox {
   margin-top: 0.7rem;
-}
-
-.specRow {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.85rem;
-}
-
-.specRow:last-child {
-  border-bottom: none;
-}
-
-.specRowLabel {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.specRowValue {
-  color: var(--ink-soft);
-  text-align: right;
 }
 
 .specTableScroll {
@@ -449,7 +493,7 @@
 
 .specTable th {
   text-align: left;
-  font-size: 0.64rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -460,7 +504,7 @@
 }
 
 .specTable td {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   padding: 0.75rem;
   border-bottom: 1px solid var(--line);
@@ -522,14 +566,14 @@
 }
 
 .resourceLabel {
-  font-size: 0.87rem;
+  font-size: 0.97rem;
   font-weight: 700;
   color: var(--accent);
   margin: 0;
 }
 
 .resourceMeta {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--ink-faint);
   margin: 0 0 0.1rem;
 }
@@ -537,7 +581,7 @@
 /* ── Components and Accessories ───────────────────────────────────────── */
 
 .systemIntro {
-  font-size: 0.9rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
   margin: 0 0 1.5rem;
 }
@@ -568,7 +612,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: var(--ink-soft);
 }
@@ -579,7 +623,7 @@
 }
 
 .systemGroupLabel {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -612,6 +656,86 @@
   outline-offset: 2px;
 }
 
+/* ── Shared: Profile / Component picker rows ──────────────────────────────
+   Stacked rows instead of a fixed-column table, so long specs/part-no/UOM
+   values wrap onto their own line instead of forcing horizontal scroll at
+   phone widths. Used by both Choose's profile list and Components and
+   Accessories' per-category lists. */
+
+.itemList {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--raised);
+}
+
+.itemRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.12s ease;
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+/* Whole row lights up on selection — pale accent fill on a selected row. */
+.itemRow[data-selected='true'] {
+  background: var(--accent-soft);
+}
+
+.itemRowText {
+  min-width: 0;
+  flex: 1;
+}
+
+.itemRowName {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.itemRowSub {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+  line-height: 1.4;
+  margin-top: 0.15rem;
+}
+
+.itemMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1rem;
+  row-gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+
+.itemMetaField {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.itemMetaLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.itemMetaValue {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
 /* ── Stockists ─────────────────────────────────────────────────────────── */
 
 .emptyState {
@@ -619,12 +743,12 @@
   align-items: center;
   gap: 0.55rem;
   color: var(--ink-faint);
-  font-size: 0.84rem;
-  padding: 0.4rem 0 1.5rem;
+  font-size: 0.92rem;
+  padding: 0.3rem 0 0.5rem;
 }
 
 .selectionColourNote {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   margin: -0.3rem 0 0.75rem;
 }
@@ -638,16 +762,15 @@
   display: block;
   font-weight: 400;
   color: var(--ink-faint);
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   margin-top: 0.15rem;
   white-space: normal;
 }
 
-/* "Add to shopping list" — the one real action V2's sandbox never needed
-   (it only ever filled a live preview table). Same visual language as the
-   card's closing Share action (.barNext) but full width and with a
-   post-add success state. Used by Trade Desk, which already has a real
-   cart (see SystemCardV2Experience's onAddToList prop). */
+/* "Add to shopping list" — same visual language as the card's closing
+   Share action (.barNext) but full width and with a post-add success
+   state. Used by Trade Desk, which has a real cart (see
+   SystemCardV2Experience's onAddToList prop). */
 .addToListBtn {
   display: flex;
   width: 100%;
@@ -656,12 +779,14 @@
   gap: 0.45rem;
   padding: 0.8rem 1rem;
   min-height: 44px;
-  background: var(--ink);
+  /* Brand accent, not plain ink — reads as the card's one real
+     call-to-action instead of blending into the other black text. */
+  background: var(--accent);
   color: var(--paper);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--accent);
   border-radius: 10px;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;

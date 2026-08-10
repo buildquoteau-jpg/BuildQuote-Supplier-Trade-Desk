@@ -1,13 +1,6 @@
-// Attributes and Information screen — ported from Data Studio's System
-// Card V2 (components/system-card-v2/AttributesInfoReveal.tsx), retyped
-// against this app's own SystemCardSystem. Every real, non-null technical
+// Attributes and Information screen. Every real, non-null technical
 // attribute the data model holds; fields that don't exist for a given
 // system are correctly absent rather than printed as filler.
-//
-// One field from the Data Studio source is intentionally dropped: this
-// repo's local SystemCardSystem (components/system-card/types.ts) has no
-// `applications` column (a Data-Studio-only addition not mirrored here) —
-// so there's no Applications block. Nothing else changed.
 
 import type { SystemCardSystem } from '@/components/system-card/types'
 import styles from './RevealsBody.module.css'
@@ -20,29 +13,32 @@ export function hasAttributesContent(system: SystemCardSystem): boolean {
   return false
 }
 
-export function AttributesInfoReveal({ system }: { system: SystemCardSystem }) {
-  const ratings: { label: string; value: string }[] = []
-  if (system.moisture_resistant) ratings.push({ label: 'Moisture resistance', value: 'Resistant' })
-  if (system.bal_rating) ratings.push({ label: 'BAL rating', value: system.bal_rating })
-  if (system.fire_rating) ratings.push({ label: 'Fire rating', value: system.fire_rating })
-  if (system.acoustic_rating) ratings.push({ label: 'Acoustic rating', value: system.acoustic_rating })
-  if (system.structural_grade) ratings.push({ label: 'Structural grade', value: system.structural_grade })
-  if (system.australian_made != null) ratings.push({ label: 'Australian made', value: system.australian_made ? 'Yes' : 'No' })
+type PillTone = 'moisture' | 'bal' | 'fire' | 'acoustic' | 'structural' | 'australian' | 'colourways'
+  | 'custom0' | 'custom1' | 'custom2' | 'custom3' | 'custom4'
 
-  const badges: { label: string; tone: 'performance' | 'neutral' }[] = []
-  if (system.moisture_resistant) badges.push({ label: 'Moisture resistant', tone: 'performance' })
+const CUSTOM_TONES: PillTone[] = ['custom0', 'custom1', 'custom2', 'custom3', 'custom4']
+
+export function AttributesInfoReveal({ system }: { system: SystemCardSystem }) {
+  // Every attribute-like fact about the system as one flat list of pills --
+  // previously split three ways (a floating badge row, a Performance
+  // table, and a separate Additional specification table). Now there's
+  // exactly one pill per fact, all under the Performance heading.
+  const pills: { text: string; tone: PillTone }[] = []
+  if (system.moisture_resistant) pills.push({ text: 'Moisture resistant', tone: 'moisture' })
+  if (system.bal_rating) pills.push({ text: `BAL ${system.bal_rating}`, tone: 'bal' })
+  if (system.fire_rating) pills.push({ text: `FRL ${system.fire_rating}`, tone: 'fire' })
+  if (system.acoustic_rating) pills.push({ text: system.acoustic_rating, tone: 'acoustic' })
+  if (system.structural_grade) pills.push({ text: system.structural_grade, tone: 'structural' })
+  if (system.australian_made) pills.push({ text: 'Australian made', tone: 'australian' })
   if (system.system_colours.length > 0) {
-    badges.push({ label: `${system.system_colours.length} colourway${system.system_colours.length !== 1 ? 's' : ''}`, tone: 'neutral' })
+    pills.push({ text: `${system.system_colours.length} colourway${system.system_colours.length !== 1 ? 's' : ''}`, tone: 'colourways' })
   }
+  system.custom_technical_attributes?.forEach((attr, i) => {
+    pills.push({ text: `${attr.label}: ${attr.value}`, tone: CUSTOM_TONES[i % CUSTOM_TONES.length] })
+  })
 
   return (
     <>
-      {badges.length > 0 && (
-        <div className={styles.badgeRow}>
-          {badges.map(b => <span key={b.label} className={styles.badge} data-tone={b.tone}>{b.label}</span>)}
-        </div>
-      )}
-
       {system.description && (
         <div className={styles.specGroup}>
           <p className={styles.specGroupLabel}>Description</p>
@@ -52,29 +48,12 @@ export function AttributesInfoReveal({ system }: { system: SystemCardSystem }) {
         </div>
       )}
 
-      {ratings.length > 0 && (
+      {pills.length > 0 && (
         <div className={styles.specGroup}>
           <p className={styles.specGroupLabel}>Performance</p>
-          <div className={styles.specBox}>
-            {ratings.map(r => (
-              <div key={r.label} className={styles.specRow}>
-                <span className={styles.specRowLabel}>{r.label}</span>
-                <span className={styles.specRowValue}>{r.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {system.custom_technical_attributes && system.custom_technical_attributes.length > 0 && (
-        <div className={styles.specGroup}>
-          <p className={styles.specGroupLabel}>Additional specification</p>
-          <div className={styles.specBox}>
-            {system.custom_technical_attributes.map(a => (
-              <div key={a.label} className={styles.specRow}>
-                <span className={styles.specRowLabel}>{a.label}</span>
-                <span className={styles.specRowValue}>{a.value}</span>
-              </div>
+          <div className={styles.attributePillRow}>
+            {pills.map((p, i) => (
+              <span key={`${p.tone}-${i}`} className={styles.attributePill} data-tone={p.tone}>{p.text}</span>
             ))}
           </div>
         </div>
