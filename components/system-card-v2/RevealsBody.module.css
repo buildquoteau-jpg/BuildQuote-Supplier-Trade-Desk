@@ -802,8 +802,8 @@
 }
 
 .addToListBtn[data-state='success'] {
-  background: var(--success);
-  border-color: var(--success);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .addToListBtn:hover:not(:disabled) {

@@ -58,7 +58,7 @@ export function useMaterialsListRows(system: SystemCardSystem) {
       id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
       name: r.name,
       sku: r.sku ?? '',
-      desc: r.spec ?? '',
+      desc: [r.spec, colourName && `Colour: ${colourName}`].filter(Boolean).join(' · '),
       uom: fmtUom(r.uom) || 'EA',
       qty: 1,
     }))

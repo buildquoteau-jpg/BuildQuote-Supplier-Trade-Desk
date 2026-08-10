@@ -12,7 +12,7 @@
       "name": "buildquote",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "3000"],
-      "cwd": "../buildquote-v6-live/buildquote",
+      "cwd": "../../Build-Quote-v6/Build-Quote-v6/buildquote",
       "port": 3000,
       "autoPort": true
     }
