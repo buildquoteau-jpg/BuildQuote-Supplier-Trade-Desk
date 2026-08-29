@@ -1,248 +1,124 @@
-# BuildQuote Architecture
+# BuildQuote Trade Desk
 
-BuildQuote consists of three independent web applications that share a single central database.
+Supplier and admin portal for BuildQuote. Suppliers manage their profile, embed
+widgets, and their RFQ inbox; BuildQuote staff create suppliers and assign
+widgets. Public surfaces are the supplier directory and embeddable widgets.
 
-Each platform has its own repository, UI, deployment, and development environment to keep the codebases simple and mentally manageable. All platforms communicate through a shared Supabase database.
-
----
-
-# Platforms
-
-## 1. BuildQuote RFQ Platform
-
-Purpose:
-Allows builders to upload or type a building materials list and send a Request For Quote (RFQ) to suppliers.
-
-Typical workflow:
-
-Builder → Upload materials list
-AI parsing → Structured materials
-Builder selects supplier
-RFQ sent to supplier
-
-Core data stored:
-
-* RFQ requests
-* RFQ items
-* builder details
-* delivery/project info
-
-The RFQ platform references manufacturer components when available.
+**Not** a manufacturer login or catalogue-management app — catalogue data
+(manufacturers/systems/components) is read here, not authored here.
 
 ---
 
-## 2. BuildQuote Manufacturer Portal
+## Why fork this
 
-Purpose:
-Allows builders to browse manufacturer systems and select components to include in RFQs.
-
-Example:
-
-James Hardie → Axon Cladding System
-
-System contains selectable components such as:
-
-* panels
-* trims
-* flashings
-* fixings
-* sealants
-* accessories
-
-Builders select quantities and export the selected components into the RFQ platform.
-
-The UI displays systems as **System Cards** containing rows of components.
-
-Component specifications are stored in structured fields so they can be exported directly into RFQs.
+- Turnkey supplier-portal pattern: auth-gated dashboard (profile, widget
+  management, RFQ inbox, account) built on Supabase Auth, ready to adapt for any
+  directory-of-vendors product.
+- **Embeddable widgets are the standout standalone piece** — a single-brand
+  widget (`/widget/[token]`) or a multi-brand widget (`/embed/[slug]`) that
+  suppliers can drop straight onto their own external website, independent of
+  everything else in this repo.
+- Clean separation from catalogue authoring and RFQ/builder logic — read this repo
+  if you want "how do vendors manage their own listing + leads," not "how is
+  product data parsed."
 
 ---
 
-## 3. South West Supplier Directory
+## Who this is for
 
-Purpose:
-A regional directory of building material suppliers.
+### Suppliers
+- Log in, manage your own profile and which product systems you're listed
+  against (`/supplier/[slug]`).
+- Get an embeddable widget for your own website — no code, just a token URL —
+  showing your products with BuildQuote branding.
+- Receive and manage incoming RFQs and enquiries in one inbox, plus a
+  customer-review flow (`/supplier-review/[token]`).
+- **Just this piece:** the widget alone (`/widget/[token]` or `/embed/[slug]`) is
+  usable as an embed on a supplier's own site without them ever touching the
+  dashboard.
 
-Example entries:
+### Manufacturers
+- Not this repo's job directly — manufacturer catalogue data is authored in
+  **Data Studio**. Trade Desk only reads it (read-only `manufacturers`, `systems`,
+  `components` tables) to power supplier widgets and the directory.
 
-* M&B Building Supplies
-* Bunnings Busselton
-* local timber yards
-* roofing suppliers
+### Builders
+- Browse the public supplier directory (`/supplierdirectory`) to find a local
+  supplier, then jump straight into an RFQ.
+- **Just this piece:** the directory is public and unauthenticated — usable as a
+  standalone "find a supplier" reference even without ever sending an RFQ.
 
-Builders can browse suppliers and jump directly into the RFQ tool.
-
-Stored data includes:
-
-* supplier name
-* location
-* contact info
-* website
-* supplier category
-
----
-
-# Repository Structure
-
-Each platform is built as a separate project.
-
-buildquote-rfq
-buildquote-manufacturer-portal
-buildquote-supplier-directory
-
-Each repository has:
-
-* its own GitHub repo
-* its own Codespaces environment
-* its own deployment
-* its own UI and routing
-
-This separation keeps each system small and easier to reason about.
+### BuildQuote staff
+- Admin panel (`/admin`) to create suppliers and assign widgets — the
+  provisioning side of the portal.
 
 ---
 
-# Database Architecture (Supabase)
+## How the three BuildQuote repos fit together
 
-All platforms share a single Supabase project.
-
-This avoids data duplication and allows RFQs to reference real manufacturer components.
-
-Example high-level table groups:
-
-Manufacturer catalogue
-
-* manufacturers
-* systems
-* components
-
-RFQ platform
-
-* rfqs
-* rfq_items
-* builders
-* projects
-
-Supplier directory
-
-* suppliers
-* supplier_locations
-* supplier_categories
-
----
-
-# Component Data Model
-
-Components represent individual selectable items in a manufacturer system.
-
-Examples:
-
-* fibre cement panels
-* aluminium trims
-* flashing sections
-* batten systems
-* fixings
-* sealants
-* brackets
-
-The schema is designed to support many types of building products without assuming a specific shape (for example panels vs rolls vs fixings).
-
-Structured fields include:
-
-* SKU
-* name
-* unit of measure
-* length
-* width
-* thickness
-* diameter
-* coverage
-* weight
-* material
-* finish
-* colour
-* profile
-
-Additional manufacturer-specific specifications can be stored in a flexible JSON field.
-
-This keeps common data structured while allowing unusual attributes.
-
----
-
-# Data Flow Between Platforms
-
-Manufacturer Portal → RFQ Platform
-
-Builder selects components from a system.
-
-Selected components are exported as structured data and inserted into an RFQ request.
-
-RFQ Platform → Supplier
-
-The RFQ platform formats the selected materials into a quote request and sends it to a supplier.
-
-Supplier Directory → RFQ Platform
-
-Builders can open the RFQ platform directly from a supplier page.
-
----
-
-# Design Principles
-
-BuildQuote follows a few key principles:
-
-Keep platforms independent
-Keep database shared
-Keep product data structured
-Avoid duplicate data
-Keep UI simple for builders
-
----
-
-# Future Extensions
-
-Possible future additions include:
-
-* manufacturer document ingestion (PDF spec sheets)
-* automated component extraction using AI
-* product availability by region
-* supplier price catalogues
-* builder project libraries
-
-
-
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Data Studio  ──publish──▶  Shared production Supabase  ◀──manage listing──  Trade Desk (this repo)
+                                     │                          │
+                                     ▼                          │
+                         Build-Quote-Library-and-               │
+                         Request-for-Quotation                  │
+                         (buildquote.com.au)                    │
+                         renders System Card, builder            │
+                         picks a supplier from the ─────────────┘
+                         Trade Desk directory, sends RFQ
+                         → lands in supplier's Trade Desk inbox
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Trade Desk → builder flow:** the supplier directory here is where a builder
+  discovers who to send an RFQ to; the RFQ is composed and sent from
+  buildquote.com.au, not from here.
+- **Trade Desk ← Data Studio:** catalogue data (manufacturers/systems/components)
+  used to build widgets and directory listings is authored in Data Studio and
+  read here — never written here.
+- **Trade Desk → suppliers' own sites:** the only outbound integration surface —
+  widgets embedded on third-party supplier websites.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Live product surfaces
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [buildquote.com.au](https://buildquote.com.au) — builder-facing app
+- [buildquote.com.au/library](https://buildquote.com.au/library) — public product
+  library (System Cards)
+- [search.buildquote.com.au](https://search.buildquote.com.au) — this app
+  (supplier directory + supplier/admin portal)
+- [studio.buildquote.com.au](https://studio.buildquote.com.au) — manufacturer data
+  ingestion (Data Studio)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS
+- Supabase Auth + Supabase DB (shared production project)
+- Resend — transactional email (RFQ / review notifications)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Setup
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev -- -p 3001   # buildquote usually holds :3000
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Env vars — see [`CLAUDE.md`](CLAUDE.md#environment-variables) for the full table;
+notably `RESEND_API_KEY` is required at build time (the Resend client is
+instantiated at module load). Before pushing: `npx tsc --noEmit && npm run build`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Never commit real Supabase or Resend keys.** This repo has no `.env.example`
+yet — see Open source status below.
+
+---
+
+## Open source status
+
+- **License:** not yet chosen — **TODO**. Until a `LICENSE` file with a real
+  license is added, standard copyright applies (no reuse rights are granted). See
+  [`LICENSE`](LICENSE).
+- **Secrets:** a pattern scan of tracked files found no committed API keys /
+  service-role keys / JWTs at time of writing. No `.env.example` exists yet —
+  add one (variable names only, no values) before treating this as a
+  self-host-ready open-source repo. A full manual audit of git history is still
+  recommended before relying on this scan alone.
