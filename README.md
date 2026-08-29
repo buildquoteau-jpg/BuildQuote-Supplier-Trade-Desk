@@ -107,8 +107,8 @@ Env vars — see [`CLAUDE.md`](CLAUDE.md#environment-variables) for the full tab
 notably `RESEND_API_KEY` is required at build time (the Resend client is
 instantiated at module load). Before pushing: `npx tsc --noEmit && npm run build`.
 
-**Never commit real Supabase or Resend keys.** This repo has no `.env.example`
-yet — see Open source status below.
+Copy [`.env.example`](.env.example) → `.env.local` and fill in values. **Never
+commit real Supabase or Resend keys.**
 
 ---
 
@@ -118,7 +118,5 @@ yet — see Open source status below.
   license is added, standard copyright applies (no reuse rights are granted). See
   [`LICENSE`](LICENSE).
 - **Secrets:** a pattern scan of tracked files found no committed API keys /
-  service-role keys / JWTs at time of writing. No `.env.example` exists yet —
-  add one (variable names only, no values) before treating this as a
-  self-host-ready open-source repo. A full manual audit of git history is still
-  recommended before relying on this scan alone.
+  service-role keys / JWTs at time of writing. A full manual audit of git
+  history is still recommended before relying on this scan alone.
