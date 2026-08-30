@@ -24,6 +24,17 @@ widgets. Public surfaces are the supplier directory and embeddable widgets.
 
 ---
 
+## About the creator
+
+This was built solo by **Melia Knapp**, after seeing — from inside a local
+hardware supply store — how scattered building-product information is for
+everyone who needs it, suppliers included. The full story of why this exists
+and why it's open source is in the
+[Build-Quote-Library-and-Request-for-Quotation README](https://github.com/buildquoteau-jpg/Build-Quote-Library-and-Request-for-Quotation#about-the-creator).
+Questions or feedback: [meliagrace@gmail.com](mailto:meliagrace@gmail.com).
+
+---
+
 ## Who this is for
 
 ### Suppliers
