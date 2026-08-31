@@ -1,5 +1,11 @@
 # BuildQuote Trade Desk
 
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Auth_%2B_DB-3ECF8E?logo=supabase&logoColor=white)
+![Resend](https://img.shields.io/badge/Resend-email-000000?logo=resend&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+
 Supplier and admin portal for BuildQuote. Suppliers manage their profile, embed
 widgets, and their RFQ inbox; BuildQuote staff create suppliers and assign
 widgets. Public surfaces are the supplier directory and embeddable widgets.
@@ -50,12 +56,14 @@ Questions or feedback: [meliagrace@gmail.com](mailto:meliagrace@gmail.com).
 
 ### Manufacturers
 - Not this repo's job directly — manufacturer catalogue data is authored in
-  **Data Studio**. Trade Desk only reads it (read-only `manufacturers`, `systems`,
-  `components` tables) to power supplier widgets and the directory.
+  **[Data Studio](https://github.com/buildquoteau-jpg/BuildQuote-Manufacturer-Data-Studio)**.
+  Trade Desk only reads it (read-only `manufacturers`, `systems`, `components`
+  tables) to power supplier widgets and the directory.
 
 ### Builders
-- Browse the public supplier directory (`/supplierdirectory`) to find a local
-  supplier, then jump straight into an RFQ.
+- Browse the public supplier directory
+  ([`/supplierdirectory`](https://search.buildquote.com.au/supplierdirectory))
+  to find a local supplier, then jump straight into an RFQ.
 - **Just this piece:** the directory is public and unauthenticated — usable as a
   standalone "find a supplier" reference even without ever sending an RFQ.
 
