@@ -39,6 +39,15 @@ and why it's open source is in the
 [Build-Quote-Library-and-Request-for-Quotation README](https://github.com/buildquoteau-jpg/Build-Quote-Library-and-Request-for-Quotation#about-the-creator).
 Questions or feedback: [meliagrace@gmail.com](mailto:meliagrace@gmail.com).
 
+**Want to try it live?** The public
+[supplier directory](https://search.buildquote.com.au/supplierdirectory) is
+open to everyone, no account needed. The supplier dashboard and admin panel
+aren't open self-serve — accounts are created manually to keep a lid on
+potential misuse of a public directory listing. Email
+[meliagrace@gmail.com](mailto:meliagrace@gmail.com) for a demo login, or fork
+the repo and run it on your own infrastructure to try the full thing
+yourself.
+
 ---
 
 ## Who this is for
