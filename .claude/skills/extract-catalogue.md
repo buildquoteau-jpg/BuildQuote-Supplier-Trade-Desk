@@ -1,6 +1,6 @@
 ---
 description: Use this skill to extract structured product data from a manufacturer's PDF catalogue and output it as Supabase-ready SQL INSERT statements. Trigger when the user provides a PDF catalogue file and asks to import, extract, or load products from it. Also trigger for phrases like "extract this catalogue", "load products from PDF", "import manufacturer data".
-argument-hint: path/to/catalogue.pdf  (e.g. /Users/melia/Downloads/ntw-catalogue-2025.pdf)
+argument-hint: path/to/catalogue.pdf  (e.g. ~/Downloads/ntw-catalogue-2025.pdf)
 ---
 
 # Manufacturer Catalogue Extractor

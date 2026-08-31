@@ -1,6 +1,6 @@
 ---
 description: Use this skill to compare a manufacturer's PDF catalogue against their existing system cards in Supabase and identify errors, missing data, or outdated information. Trigger when the user asks to "check", "verify", "audit", or "compare" a catalogue against the database. Also works as a standalone prompt for ChatGPT, Claude.ai, or Perplexity — see the Standalone Prompt section below.
-argument-hint: path/to/catalogue.pdf  (e.g. /Users/melia/Downloads/ntw-catalogue-2025.pdf)
+argument-hint: path/to/catalogue.pdf  (e.g. ~/Downloads/ntw-catalogue-2025.pdf)
 ---
 
 # Catalogue Verification Agent
