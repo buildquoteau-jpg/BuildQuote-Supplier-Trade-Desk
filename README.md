@@ -59,6 +59,32 @@ yourself.
   showing your products with BuildQuote branding.
 - Receive and manage incoming RFQs and enquiries in one inbox, plus a
   customer-review flow (`/supplier-review/[token]`).
+- **Trade Desk Search** (the "Trade Desk" tab on the supplier dashboard) — a
+  counter-staff tool for looking a customer's request up against what this
+  supplier actually stocks, on the spot:
+  - Weighted fuzzy search across every text field a System Card renders —
+    name, product code, category, colours, profiles, custom attributes,
+    manufacturer, performance specs, description, notes, and linked
+    components — so a customer's own wording ("BAL 29 deck", "820 flush
+    internal door", a typo'd product name) still finds the right stocked
+    product, scored and ranked rather than exact-match only.
+  - Results toggle between a **Products** view and a **Manufacturers** view
+    (grouped by brand) for the same query.
+  - **Cross-sell suggestions** — "You may also be interested in…" surfaces
+    adjacent categories worth browsing off the back of the current search.
+  - Select one or more matches and **send a customer review link**
+    (`/supplier-review/[token]`) by email, SMS, or WhatsApp (SMS/WhatsApp
+    only where the supplier's account has messaging enabled) — the fastest
+    path from "customer asks at the counter" to "customer has a link to
+    confirm what they want."
+  - Opening a product goes straight into the same System Card experience
+    (`components/system-card-v2/`) used everywhere else, so what the
+    supplier sees while searching matches what a builder sees on the public
+    card.
+  - **Just this piece:** none of it writes catalogue data — Trade Desk
+    Search only ever reads the shared `systems`/`components` tables and
+    whatever this supplier is listed against; it's a lookup and
+    hand-off tool, not a catalogue editor.
 - **Just this piece:** the widget alone (`/widget/[token]` or `/embed/[slug]`) is
   usable as an embed on a supplier's own site without them ever touching the
   dashboard.
