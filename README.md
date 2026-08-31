@@ -13,6 +13,8 @@ widgets. Public surfaces are the supplier directory and embeddable widgets.
 **Not** a manufacturer login or catalogue-management app — catalogue data
 (manufacturers/systems/components) is read here, not authored here.
 
+<img src="docs/screenshots/system-card-collage.png" alt="A System Card — photo collage, colours/profiles picker, and materials list — the same card a supplier sees when they open a product from Trade Desk Search" width="900">
+
 ---
 
 ## Why fork this
@@ -62,6 +64,9 @@ yourself.
 - **Trade Desk Search** (the "Trade Desk" tab on the supplier dashboard) — a
   counter-staff tool for looking a customer's request up against what this
   supplier actually stocks, on the spot:
+
+  <img src="docs/screenshots/trade-desk-search.png" alt="Trade Desk Search — a query for 'bal 29 deck' returns weighted, ranked stocked matches across manufacturers, plus a cross-sell suggestion strip" width="900">
+
   - Weighted fuzzy search across every text field a System Card renders —
     name, product code, category, colours, profiles, custom attributes,
     manufacturer, performance specs, description, notes, and linked
