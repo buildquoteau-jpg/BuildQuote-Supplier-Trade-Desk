@@ -316,9 +316,10 @@ commit real Supabase or Resend keys.**
 
 ## Open source status
 
-- **License:** not yet chosen — **TODO**. Until a `LICENSE` file with a real
-  license is added, standard copyright applies (no reuse rights are granted). See
-  [`LICENSE`](LICENSE).
+- **License:** [MIT](LICENSE) — free to use, modify, and redistribute, no
+  restrictions. If you do use any part of this, a heads-up to
+  [meliagrace@gmail.com](mailto:meliagrace@gmail.com) is genuinely
+  appreciated (not required — see [`LICENSE`](LICENSE)).
 - **Secrets:** a pattern scan of tracked files found no committed API keys /
   service-role keys / JWTs at time of writing. A full manual audit of git
   history is still recommended before relying on this scan alone.
