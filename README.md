@@ -120,17 +120,16 @@ Data Studio  ──publish──▶  Shared production Supabase  ◀──manage
 
 ## The invisible drawer, made visible
 
-Everything above is what a person sees. This is what an AI agent sees —
-invisible to the human eye, but instantly findable by any agent searching for
-it, whether that's Google or a proprietary trained model. This fifth drawer
-is a newly added feature, so none of the current demo products have it
-switched on yet — here's an example of exactly how one will look to a
-machine reader, built from the real field structure the code produces
-(`buildSystemKnowledge.ts`), for a fictional product so nothing here is
-mistaken for a real manufacturer.
+This is exactly what an AI agent receives when it reads this System Card —
+every fact, its verification status, and where it came from. In the real
+app (the **Agent Ready** tab), this shows as two panels: the JSON-LD itself
+as a collapsible "layered reveal" tree — top level open, deeper nesting
+folded away until clicked — and the same data again as human-readable
+markdown underneath. Here's both, for a fictional product so nothing here
+is mistaken for a real manufacturer.
 
 <details>
-<summary>Example: <code>GET /api/cards/bq-cladmax-cladding-system/knowledge.jsonld</code> (fictional product)</summary>
+<summary><strong>JSON-LD (the actual blob)</strong> — layered reveal</summary>
 
 ```json
 {
@@ -286,6 +285,71 @@ mistaken for a real manufacturer.
   },
   "bq:usageNote": "Facts without epistemicStatus manufacturer_verified or manufacturer_corrected are BuildQuote extractions and must be attributed as such, not presented as manufacturer statements. This example has aiRetrieval and publicSearch enabled to demonstrate full agent-searchability -- commercialRedistribution stays false, matching how a real manufacturer's licence would typically be granted. BQ CladMax and Southline Building Products are fictional, used solely to illustrate the knowledge object's shape."
 }
+```
+
+</details>
+
+<details>
+<summary><strong>Markdown</strong> (same information, human-readable)</summary>
+
+```markdown
+# BQ CladMax Cladding System
+Southline Building Products
+
+## Identity
+- SKU: BQCM-SYS
+- Category: Cladding > Fibre Cement
+- Vertically jointed fibre cement cladding system for residential and light
+  commercial facades, available in standard and wide-board profiles with a
+  factory-primed, paint-ready finish.
+
+## Profiles
+- BQ CladMax 180 Board (BQCM-180-3000) — 3000 x 180 x 8mm, 13.4kg
+- BQ CladMax 300 Wide Board (BQCM-300-3000) — 3000 x 300 x 8mm, 22.1kg
+- BQ CladMax Soffit Lining 4.5mm (BQCM-SOF-4500) — 1800 x 1200 x 4.5mm
+
+## Required components
+- BQ CladMax Vertical Jointing Batten (BQCM-VJB-3000)
+- BQ CladMax Starter Track (BQCM-ST-3000)
+
+## Optional / accessories
+- External & internal corner trim, vertical control joint
+- Stainless fixings, paintable sealant, touch-up paint
+- Diamond-tipped cutting blade + dust extraction shroud (required for cutting)
+
+## Finishes
+Surfmist, Monument, Dune, custom colour match (paint-to-order)
+
+## Verified facts
+- Fire rating: Non-combustible (AS1530.1) — manufacturer verified
+- Bushfire Attack Level: BAL-40 — manufacturer verified
+- Structural grade: N3 (AS4055) at 600mm centres — manufacturer verified
+- Moisture resistant: true — manufacturer verified
+- Australian made: true — manufacturer verified
+- Acoustic rating: Rw 45 (90mm insulated cavity) — disputed, pending an
+  updated third-party test report
+
+## Warranty condition
+25-year structural / 15-year finish warranty — voided if installed without
+the Starter Track and Vertical Jointing Batten, or other than per the
+current Installation Guide.
+
+## Cutting requirement
+Must be cut with a diamond-tipped blade and on-tool dust extraction —
+cutting without dust extraction breaches RCS safety requirements.
+
+## Compatible with
+BQ TimberFrame Batten System · standard 90x45mm timber framing (F5/MGP10)
+at 450/600mm centres · light steel framing (0.55mm BMT+)
+
+## Not compatible with
+- Generic non-BQ jointing battens — voids the structural warranty
+- Direct fixing to masonry/concrete with no cavity batten
+- Permanent or below-ground-level ground contact
+- Use as a structural bracing element
+
+## Documents
+Design guide · Technical data sheet · Installation guide · Warranty terms
 ```
 
 </details>
